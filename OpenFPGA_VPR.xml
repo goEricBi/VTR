@@ -23,7 +23,6 @@ O = 10+10
 	output = 2
 
 -->
-
 <pb_type name="clb">
   <input name="I" num_pins="22" equivalent="full"/>
   <input name="clk_b" equivalent="false"/>
