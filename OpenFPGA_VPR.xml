@@ -1,0 +1,89 @@
+<!--
+Example of a classical FPGA soft logic block with
+N = 10, K = 4, I = 22, O = 10
+BLEs consisting of a single LUT followed by a flip-flop that can be bypassed
+-->
+<!--
+Based on the provided figure :
+BLE:
+8 + 1 inputs
+2 outputs
+1 clock
+
+CLB:
+10 BLE
+I = 22 (will the corssbard chanegd?)
+O = 10+10
+	lut_4:
+	input = 8
+	output =2
+
+	ff:
+	input = 2+1
+	output = 2
+	
+	
+	Final result:
+	1 CLB + 2 Connect Block + 1 Switch .... 
+	K4 
+
+-->
+
+<pb_type name="clb">
+  <input name="I" num_pins="22" equivalent="full"/>
+  <input name="clk_b" equivalent="false"/>
+  <output name="O" num_pins="20" equivalent="instance"/>
+  <output name="O_b" num_pins="20" equivalent="instance"/>
+  <clock name="clk" equivalent="false"/>
+
+  <pb_type name="ble" num_pb="10">
+    <input name="in" num_pins="4"/>
+	<input name="in_b" num_pins="4"/>
+	<input name="clk_b" num_pins="1"/>
+    <output name="out" num_pins="1"/>
+	<output name="out_b" num_pins="1"/>
+    <clock name="clk"/>
+
+    <pb_type name="lut_4" blif_model=".names" num_pb="1" class="lut">
+      <input name="in" num_pins="4" port_class="lut_in"/>
+	  <input name="in_b" num_pins="4" port_class="lut_in"/>
+      <output name="out" num_pins="1" port_class="lut_out"/>
+	  <output name="out_b" num_pins="1" port_class="lut_out"/>
+    </pb_type>
+    <pb_type name="ff" blif_model=".latch" num_pb="1" class="flipflop">
+      <input name="D" num_pins="1" port_class="D"/>
+	  <input name="D_b" num_pins="1" port_class="D"/>
+	  <!-- not sure port_class = "clock"-->
+	  <input name="clk_b" num_pins="1" port_class="clock"/> 
+      <output name="Q" num_pins="1" port_class="Q"/>
+	  <output name="Q_b" num_pins="1" port_class="Q"/>
+      <clock name="clk" port_class="clock"/>
+    </pb_type>
+
+    <interconnect>
+      <direct input="lut_4.out" output="ff.D"/>
+	  <direct input="lut_4.out_b" output="ff.D_b"/>
+      <direct input="ble.in" output="lut_4.in"/>
+	  <direct input="ble.in_b" output="lut_4.in_b"/>
+	  <!--not sure if MUX could have 4 inputs and 2 outputs in a complementary form -->
+      <mux input="ff.Q ff.Q_b lut_4.out lut_4.out_b" output="ble.out ble.out_b"/>
+      <direct input="ble.clk" output="ff.clk"/>
+    </interconnect>
+  </pb_type>
+
+  <interconnect>
+    <complete input="{clb.I ble[9:0].out}" output="ble[9:0].in"/>
+    <complete input="clb.clk" output="ble[9:0].clk"/>
+	<complete input="clb.clk_b" output="ble[9:0].clk_b"/>
+    <direct input="ble[9:0].out" output="clb.O"/>
+	<direct input="ble[9:0].out_b" output="clb.O_b"/>
+  </interconnect>
+
+  <!-- Describe complex block relation with FPGA -->
+
+  <fc_in type="frac">0.150000</fc_in>
+  <fc_out type="frac">0.125000</fc_out>
+
+  <pinlocations pattern="spread"/>
+
+</pb_type>
