@@ -1,6 +1,5 @@
 <!-- 
  Architecture file translated from ifar repository N04K04L01.FC15FO25.AREA1DELAY1.CMOS90NM.BPTM
-
  Simple architecture file consisting of clusters of 4 BLEs, each BLE contains a 4-LUT+FF pair.  Delay models from 90nm PTM.
 -->
 <architecture>
@@ -8,13 +7,21 @@
        ODIN II specific config begins 
        Describes the types of user-specified netlist blocks (in blif, this corresponds to 
        ".model [type_of_block]") that this architecture supports.
-
        Note: Basic LUTs, I/Os, and flip-flops are not included here as there are 
        already special structures in blif (.names, .input, .output, and .latch) 
        that describe them.
   -->
   <models>
     <model name = "dual_ff">
+	<input_ports>
+		<port name="D" clock="clk" combinational_sink_ports="Q"/>
+		<port name= "D_b" clock="clk" combinational_sink_ports="Q_b"/>
+		<port name= "clk" is_clock="1"/>
+	</input_ports>
+	<output_ports>
+		<port name= "Q">
+		<port nname= "Q_b">
+	</output_ports>
     </model>
   </models>
   <tiles>
