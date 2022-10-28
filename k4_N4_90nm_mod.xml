@@ -14,6 +14,8 @@
        that describe them.
   -->
   <models>
+    <model name = "dual_ff">
+    </model>
   </models>
   <tiles>
     <tile name="io">
