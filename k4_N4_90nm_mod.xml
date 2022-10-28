@@ -19,8 +19,8 @@
 		<port name= "clk" is_clock="1"/>
 	</input_ports>
 	<output_ports>
-		<port name= "Q">
-		<port name= "Q_b">
+		<port name= "Q" clock="clk">
+		<port name= "Q_b" clock="clk">
 	</output_ports>
     </model>
   </models>
