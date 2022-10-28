@@ -1,0 +1,206 @@
+<!-- 
+ Architecture file translated from ifar repository N04K04L01.FC15FO25.AREA1DELAY1.CMOS90NM.BPTM
+
+ Simple architecture file consisting of clusters of 4 BLEs, each BLE contains a 4-LUT+FF pair.  Delay models from 90nm PTM.
+-->
+<architecture>
+  <!-- 
+       ODIN II specific config begins 
+       Describes the types of user-specified netlist blocks (in blif, this corresponds to 
+       ".model [type_of_block]") that this architecture supports.
+
+       Note: Basic LUTs, I/Os, and flip-flops are not included here as there are 
+       already special structures in blif (.names, .input, .output, and .latch) 
+       that describe them.
+  -->
+  <models>
+  </models>
+  <tiles>
+    <tile name="io">
+      <sub_tile name="io" capacity="3">
+        <equivalent_sites>
+          <site pb_type="io" pin_mapping="direct"/>
+        </equivalent_sites>
+        <input name="outpad" num_pins="1"/>
+        <output name="inpad" num_pins="1"/>
+        <clock name="clock" num_pins="1"/>
+        <fc in_type="frac" in_val="1.0" out_type="frac" out_val="0.25"/>
+        <pinlocations pattern="custom">
+          <loc side="left">io.outpad io.inpad io.clock</loc>
+          <loc side="top">io.outpad io.inpad io.clock</loc>
+          <loc side="right">io.outpad io.inpad io.clock</loc>
+          <loc side="bottom">io.outpad io.inpad io.clock</loc>
+        </pinlocations>
+      </sub_tile>
+    </tile>
+    <tile name="clb">
+      <sub_tile name="clb">
+        <equivalent_sites>
+          <site pb_type="clb" pin_mapping="direct"/>
+        </equivalent_sites>
+        <input name="I" num_pins="10" equivalent="full"/>
+        <output name="O" num_pins="4" equivalent="instance"/>
+        <clock name="clk" num_pins="1"/>
+        <fc in_type="frac" in_val="0.15" out_type="frac" out_val="0.25"/>
+        <pinlocations pattern="spread"/>
+      </sub_tile>
+    </tile>
+  </tiles>
+  <!-- ODIN II specific config ends -->
+  <!-- Physical descriptions begin -->
+  <layout>
+    <auto_layout aspect_ratio="1.000000">
+      <!--Perimeter of 'io' blocks with 'EMPTY' blocks at corners-->
+      <perimeter type="io" priority="100"/>
+      <corners type="EMPTY" priority="101"/>
+      <!--Fill with 'clb'-->
+      <fill type="clb" priority="10"/>
+    </auto_layout>
+  </layout>
+  <device>
+    <sizing R_minW_nmos="4220.930176" R_minW_pmos="11207.599609"/>
+    <area grid_logic_tile_area="2229.320068"/>
+    <chan_width_distr>
+      <x distr="uniform" peak="1.000000"/>
+      <y distr="uniform" peak="1.000000"/>
+    </chan_width_distr>
+    <switch_block type="wilton" fs="3"/>
+    <connection_block input_switch_name="ipin_cblock"/>
+  </device>
+  <switchlist>
+    <switch type="mux" name="0" R="0.000000" Cin="0.000000e+00" Cout="0.000000e+00" Tdel="6.244000e-11" mux_trans_size="1.835460" buf_size="10.498600"/>
+    <!--switch ipin_cblock resistance set to yeild for 4x minimum drive strength buffer-->
+    <switch type="mux" name="ipin_cblock" R="1055.232544" Cout="0." Cin="0.000000e+00" Tdel="8.045000e-11" mux_trans_size="0.983352" buf_size="auto"/>
+  </switchlist>
+  <segmentlist>
+    <segment freq="1.000000" length="1" type="unidir" Rmetal="0.000000" Cmetal="0.000000e+00">
+      <mux name="0"/>
+      <sb type="pattern">1 1</sb>
+      <cb type="pattern">1</cb>
+    </segment>
+  </segmentlist>
+  <complexblocklist>
+    <!-- Define I/O pads begin -->
+    <!-- Capacity is a unique property of I/Os, it is the maximum number of I/Os that can be placed at the same (X,Y) location on the FPGA -->
+    <pb_type name="io">
+      <input name="outpad" num_pins="1"/>
+      <output name="inpad" num_pins="1"/>
+      <clock name="clock" num_pins="1"/>
+      <!-- IOs can operate as either inputs or outputs.
+	     Delays below come from Ian Kuon. They are small, so they should be interpreted as
+	     the delays to and from registers in the I/O (and generally I/Os are registered 
+	     today and that is when you timing analyze them.
+	     -->
+      <mode name="inpad">
+        <pb_type name="inpad" blif_model=".input" num_pb="1">
+          <output name="inpad" num_pins="1"/>
+        </pb_type>
+        <interconnect>
+          <direct name="inpad" input="inpad.inpad" output="io.inpad">
+            <delay_constant max="9.492000e-11" in_port="inpad.inpad" out_port="io.inpad"/>
+          </direct>
+        </interconnect>
+      </mode>
+      <mode name="outpad">
+        <pb_type name="outpad" blif_model=".output" num_pb="1">
+          <input name="outpad" num_pins="1"/>
+        </pb_type>
+        <interconnect>
+          <direct name="outpad" input="io.outpad" output="outpad.outpad">
+            <delay_constant max="2.675000e-11" in_port="io.outpad" out_port="outpad.outpad"/>
+          </direct>
+        </interconnect>
+      </mode>
+      <!-- Every input pin is driven by 15% of the tracks in a channel, every output pin is driven by 10% of the tracks in a channel -->
+      <!-- IOs go on the periphery of the FPGA, for consistency, 
+          make it physically equivalent on all sides so that only one definition of I/Os is needed.
+          If I do not make a physically equivalent definition, then I need to define 4 different I/Os, one for each side of the FPGA
+        -->
+      <!-- Place I/Os on the sides of the FPGA -->
+      <power method="ignore"/>
+    </pb_type>
+    <!-- Define I/O pads ends -->
+    <!-- Define general purpose logic block (CLB) begin -->
+    <pb_type name="clb">
+      <input name="I" num_pins="22" equivalent="full"/>
+      <input name="clk_b" num_pins="1" equivalent="full"/>
+      <output name="O" num_pins="20" equivalent="instance"/>
+      <output name="O_b" num_pins="20" equivalent="instance"/>
+      <clock name="clk" num_pins="1"/>
+      <!-- Describe basic logic element.
+      <pb_type name="fle" num_pb="4">
+        <input name="in" num_pins="4"/>
+        <output name="out" num_pins="1"/>
+        <clock name="clk" num_pins="1"/>
+					 -->
+        <!-- 4-LUT mode definition begin -->
+        <!--<mode name="n1_lut4"> -->
+          <!-- Define 4-LUT mode -->
+          <pb_type name="ble" num_pb="10">
+	          <input name="in_b" num_pins="4"/>
+	          <input name="clk_b" num_pins="1"/>
+            <output name="out" num_pins="1"/>
+	          <output name="out_b" num_pins="1"/>
+            <clock name="clk" num_pins="1"/>
+            <!-- Define LUT -->
+          <pb_type name="lut_4" blif_model=".names" num_pb="1" class="lut">
+            <input name="in" num_pins="8" port_class="lut_in"/>
+	          <!--<input name="in_b" num_pins="4" port_class="lut_in"/>-->
+            <output name="out" num_pins="1" port_class="lut_out"/>
+	          <!-- <output name="out_b" num_pins="1" port_class="lut_out"/> -->
+              <!-- LUT timing using delay matrix -->
+              <delay_matrix type="max" in_port="lut_4.in" out_port="lut_4.out">
+                2.253000e-10
+                2.253000e-10
+                2.253000e-10
+                2.253000e-10
+              </delay_matrix>
+            </pb_type>
+            <!-- Define flip-flop -->
+            <pb_type name="dual_ff" blif_model=".subckt dual_ff" num_pb="1">
+              <input name="D" num_pins="1" />
+	            <input name="D_b" num_pins="1" /> 
+              <output name="Q" num_pins="1"/>
+	            <output name="Q_b" num_pins="1"/> 
+              <clock name="clk" num_pins="1" port_class="clock"/>
+              <T_setup value="2.160000e-10" port="dual_ff.D" clock="clk"/>
+              <T_setup value="2.160000e-10" port="dual_ff.D_b" clock="clk"/>
+              <T_clock_to_Q max="1.426000e-10" port="dualff.Q" clock="clk"/>
+              <!-- Might need to define to Q_b -->
+            </pb_type>
+	    <interconnect>
+	      <direct input="lut_4.out" output="dual_ff.D"/>
+	      <direct input="lut_4.out_b" output="dual_ff.D_b"/>
+	      <direct input="ble.in" output="lut_4.in"/>
+	      <direct input="ble.in_b" output="lut_4.in_b"/>
+		  <!--not sure if MUX could have 4 inputs and 2 outputs in a complementary form -->
+	      <mux input="dual_ff.Q dual_ff.Q_b lut_4.out lut_4.out_b" output="ble.out ble.out_b"/>
+	      <direct input="ble.clk" output="dual_ff.clk"/>
+	    </interconnect>
+      <!--</mode> -->
+	  <!--</pb_type> -->
+    <!-- 
+          <interconnect>
+            <direct name="direct1" input="fle.in" output="ble4.in"/>
+            <direct name="direct2" input="ble4.out" output="fle.out[0:0]"/>
+            <direct name="direct3" input="fle.clk" output="ble4.clk"/>
+          </interconnect>
+    -->
+
+        <!-- </mode> -->
+        <!-- 4-LUT mode definition end -->
+      </pb_type>
+        <!-- We use a full crossbar to get logical equivalence at inputs of CLB  -->
+  	  <interconnect>
+    	  <complete input="{clb.I ble[9:0].out}" output="ble[9:0].in"/>
+    	  <complete input="clb.clk" output="ble[9:0].clk"/>
+	      <complete input="clb.clk_b" output="ble[9:0].clk_b"/>
+    	  <direct input="ble[9:0].out" output="clb.O"/>
+	      <direct input="ble[9:0].out_b" output="clb.O_b"/>
+      </interconnect>
+      <!-- Every input pin is driven by 15% of the tracks in a channel, every output pin is driven by 25% of the tracks in a channel -->
+      <!-- Place this general purpose logic block in any unspecified column -->
+    </pb_type>
+    <!-- Define general purpose logic block (CLB) ends -->
+  </complexblocklist>
+</architecture>
