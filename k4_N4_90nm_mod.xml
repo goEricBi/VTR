@@ -20,7 +20,7 @@
 	</input_ports>
 	<output_ports>
 		<port name= "Q">
-		<port nname= "Q_b">
+		<port name= "Q_b">
 	</output_ports>
     </model>
   </models>
