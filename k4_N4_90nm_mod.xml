@@ -1,6 +1,5 @@
 <!-- 
  Architecture file translated from ifar repository N04K04L01.FC15FO25.AREA1DELAY1.CMOS90NM.BPTM
-
  Simple architecture file consisting of clusters of 4 BLEs, each BLE contains a 4-LUT+FF pair.  Delay models from 90nm PTM.
 -->
 <architecture>
@@ -8,7 +7,6 @@
        ODIN II specific config begins 
        Describes the types of user-specified netlist blocks (in blif, this corresponds to 
        ".model [type_of_block]") that this architecture supports.
-
        Note: Basic LUTs, I/Os, and flip-flops are not included here as there are 
        already special structures in blif (.names, .input, .output, and .latch) 
        that describe them.
@@ -154,8 +152,8 @@
 	          <output name="out_b" num_pins="1"/>
             <clock name="clk" num_pins="1"/>
             <!-- Define LUT -->
-          <pb_type name="lut_4" blif_model=".names" num_pb="1" class="lut">
-            <input name="in" num_pins="8" port_class="lut_in"/>
+          <pb_type name="lut_4" blif_model=".names" num_pb="2" class="lut">
+            <input name="in" num_pins="4" port_class="lut_in"/>
 	          <!--<input name="in_b" num_pins="4" port_class="lut_in"/>-->
             <output name="out" num_pins="1" port_class="lut_out"/>
 	          <!-- <output name="out_b" num_pins="1" port_class="lut_out"/> -->
@@ -181,12 +179,12 @@
               <!-- Might need to define to Q_b -->
             </pb_type>
 	    <interconnect>
-	      <direct input="lut_4.out" output="dual_ff.D"/>
-	      <direct input="lut_4.out_b" output="dual_ff.D_b"/>
-	      <direct input="ble.in" output="lut_4.in"/>
-	      <direct input="ble.in_b" output="lut_4.in_b"/>
+	      <direct input="lut_4[0].out" output="dual_ff.D"/>
+	      <direct input="lut_4[1].out" output="dual_ff.D_b"/>
+	      <direct input="ble.in" output="lut_4[0].in"/>
+	      <direct input="ble.in_b" output="lut_4[1].in"/>
 		  <!--not sure if MUX could have 4 inputs and 2 outputs in a complementary form -->
-	      <mux input="dual_ff.Q dual_ff.Q_b lut_4.out lut_4.out_b" output="ble.out ble.out_b"/>
+	      <mux input="dual_ff.Q dual_ff.Q_b lut_4.out" output="ble.out ble.out_b"/>
 	      <direct input="ble.clk" output="dual_ff.clk"/>
 	    </interconnect>
       <!--</mode> -->
