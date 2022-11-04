@@ -1,5 +1,6 @@
 <!-- 
  Architecture file translated from ifar repository N04K04L01.FC15FO25.AREA1DELAY1.CMOS90NM.BPTM
+
  Simple architecture file consisting of clusters of 4 BLEs, each BLE contains a 4-LUT+FF pair.  Delay models from 90nm PTM.
 -->
 <architecture>
@@ -7,21 +8,22 @@
        ODIN II specific config begins 
        Describes the types of user-specified netlist blocks (in blif, this corresponds to 
        ".model [type_of_block]") that this architecture supports.
+
        Note: Basic LUTs, I/Os, and flip-flops are not included here as there are 
        already special structures in blif (.names, .input, .output, and .latch) 
        that describe them.
   -->
   <models>
     <model name = "dual_ff">
-	<input_ports>
-		<port name="D" clock="clk" combinational_sink_ports="Q"/>
-		<port name= "D_b" clock="clk" combinational_sink_ports="Q_b"/>
-		<port name= "clk" is_clock="1"/>
-	</input_ports>
-	<output_ports>
-		<port name= "Q" clock="clk">
-		<port name= "Q_b" clock="clk">
-	</output_ports>
+      <input_ports>
+        <port name="D" clock="clk" />
+        <port name= "D_b" clock="clk"/>
+        <port name= "clk" is_clock="1"/>
+      </input_ports>
+      <output_ports>
+        <port name= "Q" clock="clk"/>
+        <port name= "Q_b" clock="clk"/>
+      </output_ports>
     </model>
   </models>
   <tiles>
@@ -175,6 +177,7 @@
               <T_setup value="2.160000e-10" port="dual_ff.D" clock="clk"/>
               <T_setup value="2.160000e-10" port="dual_ff.D_b" clock="clk"/>
               <T_clock_to_Q max="1.426000e-10" port="dualff.Q" clock="clk"/>
+              <T_clock_to_Q max="1.426000e-10" port="dualff.Q_b" clock="clk"/>
               <!-- Might need to define to Q_b -->
             </pb_type>
 	    <interconnect>
