@@ -136,77 +136,62 @@
       <output name="O" num_pins="20" equivalent="instance"/>
       <output name="O_b" num_pins="20" equivalent="instance"/>
       <clock name="clk" num_pins="1"/>
-      <!-- Describe basic logic element.
-      <pb_type name="fle" num_pb="4">
-        <input name="in" num_pins="4"/>
+      <pb_type name="ble" num_pb="10">
+        <input name="in" num_pins="4">
+        <input name="in_b" num_pins="4"/>
+        <input name="clk_b" num_pins="1"/>
         <output name="out" num_pins="1"/>
+        <output name="out_b" num_pins="1"/>
         <clock name="clk" num_pins="1"/>
-					 -->
-        <!-- 4-LUT mode definition begin -->
-        <!--<mode name="n1_lut4"> -->
-          <!-- Define 4-LUT mode -->
-          <pb_type name="ble" num_pb="10">
-	          <input name="in_b" num_pins="4"/>
-	          <input name="clk_b" num_pins="1"/>
-            <output name="out" num_pins="1"/>
-	          <output name="out_b" num_pins="1"/>
-            <clock name="clk" num_pins="1"/>
-            <!-- Define LUT -->
-          <pb_type name="lut_4" blif_model=".names" num_pb="2" class="lut">
-            <input name="in" num_pins="4" port_class="lut_in"/>
-	          <!--<input name="in_b" num_pins="4" port_class="lut_in"/>-->
-            <output name="out" num_pins="1" port_class="lut_out"/>
-	          <!-- <output name="out_b" num_pins="1" port_class="lut_out"/> -->
-              <!-- LUT timing using delay matrix -->
-              <delay_matrix type="max" in_port="lut_4.in" out_port="lut_4.out">
-                2.253000e-10
-                2.253000e-10
-                2.253000e-10
-                2.253000e-10
-              </delay_matrix>
-            </pb_type>
-            <!-- Define flip-flop -->
-            <pb_type name="dual_ff" blif_model=".subckt dual_ff" num_pb="1">
-              <input name="D" num_pins="1" />
-	            <input name="D_b" num_pins="1" /> 
-              <output name="Q" num_pins="1"/>
-	            <output name="Q_b" num_pins="1"/> 
-              <clock name="clk" num_pins="1" port_class="clock"/>
-              <T_setup value="2.160000e-10" port="dual_ff.D" clock="clk"/>
-              <T_setup value="2.160000e-10" port="dual_ff.D_b" clock="clk"/>
-              <T_clock_to_Q max="1.426000e-10" port="dualff.Q" clock="clk"/>
-              <T_clock_to_Q max="1.426000e-10" port="dualff.Q_b" clock="clk"/>
-              <!-- Might need to define to Q_b -->
-            </pb_type>
-	    <interconnect>
-	      <direct input="lut_4[0].out" output="dual_ff.D"/>
-	      <direct input="lut_4[1].out" output="dual_ff.D_b"/>
-	      <direct input="ble.in" output="lut_4[0].in"/>
-	      <direct input="ble.in_b" output="lut_4[1].in"/>
-		  <!--not sure if MUX could have 4 inputs and 2 outputs in a complementary form -->
-	      <mux input="dual_ff.Q dual_ff.Q_b lut_4.out" output="ble.out ble.out_b"/>
-	      <direct input="ble.clk" output="dual_ff.clk"/>
-	    </interconnect>
+        <!-- Define LUT -->
+        <pb_type name="lut_4" blif_model=".names" num_pb="2" class="lut">
+          <input name="in" num_pins="4" port_class="lut_in"/>
+          <output name="out" num_pins="1" port_class="lut_out"/>
+          <!-- LUT timing using delay matrix -->
+          <delay_matrix type="max" in_port="lut_4.in" out_port="lut_4.out">
+            2.253000e-10
+            2.253000e-10
+            2.253000e-10
+            2.253000e-10
+          </delay_matrix>
+        </pb_type>
+        <!-- Define flip-flop -->
+        <pb_type name="dual_ff" blif_model=".subckt dual_ff" num_pb="1">
+          <input name="D" num_pins="1" />
+          <input name="D_b" num_pins="1" /> 
+          <input name="clk_b" num_pins="1" /> 
+          <output name="Q" num_pins="1"/>
+          <output name="Q_b" num_pins="1"/> 
+          <clock name="clk" num_pins="1" port_class="clock"/>
+          <T_setup value="2.160000e-10" port="dual_ff.D" clock="clk"/>
+          <T_setup value="2.160000e-10" port="dual_ff.D_b" clock="clk"/>
+          <T_setup value="2.160000e-10" port="dual_ff.clk_b" clock="clk"/>
+          <T_clock_to_Q max="1.426000e-10" port="dualff.Q" clock="clk"/>
+          <T_clock_to_Q max="1.426000e-10" port="dualff.Q_b" clock="clk"/>
+        </pb_type>
+        <interconnect>
+          <direct input="ble.in[3:0]" output="lut_4[0:0].in[3:0]"/>
+          <direct input="ble.in_b[3:0]" output="lut_4[1:1].in[3:0]"/>
+          <direct input="lut_4[0:0].out" output="dual_ff.D"/>
+          <direct input="lut_4[1:1].out" output="dual_ff.D_b"/>
+          <direct input="ble.clk" output="dual_ff.clk"/>
+          <direct input="ble.clk_b" output="dual_ff.clk_b"/>
+        <!--not sure if MUX could have 4 inputs and 2 outputs in a complementary form -->
+          <mux name="mux1" input="dual_ff.Q dual_ff.Q_b lut_4[1:0].out" output="ble.out ble.out_b"/>
+        </interconnect>
+      </pb_type>
       <!--</mode> -->
-	  <!--</pb_type> -->
-    <!-- 
-          <interconnect>
-            <direct name="direct1" input="fle.in" output="ble4.in"/>
-            <direct name="direct2" input="ble4.out" output="fle.out[0:0]"/>
-            <direct name="direct3" input="fle.clk" output="ble4.clk"/>
-          </interconnect>
-    -->
-
+	    <!--</pb_type> -->
         <!-- </mode> -->
         <!-- 4-LUT mode definition end -->
-      </pb_type>
+      <!--</pb_type> -->
         <!-- We use a full crossbar to get logical equivalence at inputs of CLB  -->
-  	  <interconnect>
-    	  <complete input="{clb.I ble[9:0].out}" output="ble[9:0].in"/>
-    	  <complete input="clb.clk" output="ble[9:0].clk"/>
-	      <complete input="clb.clk_b" output="ble[9:0].clk_b"/>
-    	  <direct input="ble[9:0].out" output="clb.O"/>
-	      <direct input="ble[9:0].out_b" output="clb.O_b"/>
+      <interconnect>
+        <complete input="{clb.I ble[9:0].out}" output="ble[9:0].in"/>
+        <complete input="clb.clk" output="ble[9:0].clk"/>
+        <complete input="clb.clk_b" output="ble[9:0].clk_b"/>
+        <direct input="ble[9:0].out" output="clb.O"/>
+        <direct input="ble[9:0].out_b" output="clb.O_b"/>
       </interconnect>
       <!-- Every input pin is driven by 15% of the tracks in a channel, every output pin is driven by 25% of the tracks in a channel -->
       <!-- Place this general purpose logic block in any unspecified column -->
@@ -214,3 +199,4 @@
     <!-- Define general purpose logic block (CLB) ends -->
   </complexblocklist>
 </architecture>
+
