@@ -16,6 +16,7 @@
       <input_ports>
         <port name="D" clock="clk" />
         <port name= "D_b" clock="clk"/>
+        <port name= "clk_b" clock="clk"/> <!-- is_clock="1"-->
         <port name= "clk" is_clock="1"/>
       </input_ports>
       <output_ports>
@@ -26,7 +27,7 @@
   </models>
   <tiles>
     <tile name="io">
-      <sub_tile name="io" capacity="3">
+      <sub_tile name="io" capacity="8">
         <equivalent_sites>
           <site pb_type="io" pin_mapping="direct"/>
         </equivalent_sites>
@@ -47,8 +48,10 @@
         <equivalent_sites>
           <site pb_type="clb" pin_mapping="direct"/>
         </equivalent_sites>
-        <input name="I" num_pins="10" equivalent="full"/>
+        <input name="I" num_pins="32" equivalent="full"/>
+        <input name="clk_b" num_pins="1" equivalent="full"/>
         <output name="O" num_pins="4" equivalent="instance"/>
+        <output name="O_b" num_pins="4" equivalent="instance"/>
         <clock name="clk" num_pins="1"/>
         <fc in_type="frac" in_val="0.15" out_type="frac" out_val="0.25"/>
         <pinlocations pattern="spread"/>
@@ -131,13 +134,13 @@
     <!-- Define I/O pads ends -->
     <!-- Define general purpose logic block (CLB) begin -->
     <pb_type name="clb">
-      <input name="I" num_pins="22" equivalent="full"/>
+      <input name="I" num_pins="32" equivalent="full"/>
       <input name="clk_b" num_pins="1" equivalent="full"/>
-      <output name="O" num_pins="20" equivalent="instance"/>
-      <output name="O_b" num_pins="20" equivalent="instance"/>
+      <output name="O" num_pins="4" equivalent="instance"/>
+      <output name="O_b" num_pins="4" equivalent="instance"/>
       <clock name="clk" num_pins="1"/>
-      <pb_type name="ble" num_pb="10">
-        <input name="in" num_pins="4">
+      <pb_type name="ble" num_pb="4">
+        <input name="in" num_pins="4"/>
         <input name="in_b" num_pins="4"/>
         <input name="clk_b" num_pins="1"/>
         <output name="out" num_pins="1"/>
@@ -166,18 +169,19 @@
           <T_setup value="2.160000e-10" port="dual_ff.D" clock="clk"/>
           <T_setup value="2.160000e-10" port="dual_ff.D_b" clock="clk"/>
           <T_setup value="2.160000e-10" port="dual_ff.clk_b" clock="clk"/>
-          <T_clock_to_Q max="1.426000e-10" port="dualff.Q" clock="clk"/>
-          <T_clock_to_Q max="1.426000e-10" port="dualff.Q_b" clock="clk"/>
+          <T_clock_to_Q max="1.426000e-10" port="dual_ff.Q" clock="clk"/>
+          <T_clock_to_Q max="1.426000e-10" port="dual_ff.Q_b" clock="clk"/>
         </pb_type>
         <interconnect>
-          <direct input="ble.in[3:0]" output="lut_4[0:0].in[3:0]"/>
-          <direct input="ble.in_b[3:0]" output="lut_4[1:1].in[3:0]"/>
-          <direct input="lut_4[0:0].out" output="dual_ff.D"/>
-          <direct input="lut_4[1:1].out" output="dual_ff.D_b"/>
-          <direct input="ble.clk" output="dual_ff.clk"/>
-          <direct input="ble.clk_b" output="dual_ff.clk_b"/>
+          <direct name="ble_to_lut1" input="ble.in" output="lut_4[0:0].in[3:0]"/>
+          <direct name="ble_to_lut2" input="ble.in_b" output="lut_4[1:1].in[3:0]"/>
+          <direct name="lut1_to_ff" input="lut_4[0:0].out" output="dual_ff.D"/>
+          <direct name="lut2_to_ff" input="lut_4[1:1].out" output="dual_ff.D_b"/>
+          <direct name="clock" input="ble.clk" output="dual_ff.clk"/>
+          <direct name="clock_b" input="ble.clk_b" output="dual_ff.clk_b"/>
         <!--not sure if MUX could have 4 inputs and 2 outputs in a complementary form -->
-          <mux name="mux1" input="dual_ff.Q dual_ff.Q_b lut_4[1:0].out" output="ble.out ble.out_b"/>
+          <mux name="mux1" input="dual_ff.Q lut_4[0:0].out" output="ble.out"/>
+          <mux name="mux2" input="dual_ff.Q_b lut_4[1:1].out" output="ble.out_b"/>
         </interconnect>
       </pb_type>
       <!--</mode> -->
@@ -187,11 +191,11 @@
       <!--</pb_type> -->
         <!-- We use a full crossbar to get logical equivalence at inputs of CLB  -->
       <interconnect>
-        <complete input="{clb.I ble[9:0].out}" output="ble[9:0].in"/>
-        <complete input="clb.clk" output="ble[9:0].clk"/>
-        <complete input="clb.clk_b" output="ble[9:0].clk_b"/>
-        <direct input="ble[9:0].out" output="clb.O"/>
-        <direct input="ble[9:0].out_b" output="clb.O_b"/>
+        <complete name="clb_to_ble" input="{clb.I ble[3:0].out ble[3:0].out_b}" output="ble[3:0].in"/>
+        <complete name="clb_clock" input="clb.clk" output="ble[3:0].clk"/>
+        <complete name="clb_clock_b" input="clb.clk_b" output="ble[3:0].clk_b"/>
+        <direct name="ble_to_clb1" input="ble[3:0].out" output="clb.O"/>
+        <direct name="ble_to_clb2" input="ble[3:0].out_b" output="clb.O_b"/>
       </interconnect>
       <!-- Every input pin is driven by 15% of the tracks in a channel, every output pin is driven by 25% of the tracks in a channel -->
       <!-- Place this general purpose logic block in any unspecified column -->
